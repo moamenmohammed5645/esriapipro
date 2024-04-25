@@ -1,0 +1,199 @@
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>
+      Intro to FeatureLayer | Sample | ArcGIS Maps SDK for JavaScript 4.29
+    </title>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.29/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.29/"></script>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      #viewDiv {
+        flex: 1;
+        position: relative;
+      }
+      #tableDiv {
+        flex: 1;
+        display: none;
+      }
+    </style>
+
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/widgets/Legend",
+        "esri/widgets/BasemapGallery",
+        "esri/widgets/Expand",
+        "esri/widgets/Search",
+        "esri/widgets/ScaleBar",
+        "esri/widgets/Locate",
+        "esri/widgets/FeatureTable",
+      ], (
+        Map,
+        MapView,
+        FeatureLayer,
+        Legend,
+        BasemapGallery,
+        Expand,
+        Search,
+        ScaleBar,
+        Locate,
+        FeatureTable
+      ) => {
+        const map = new Map({
+          basemap: "satellite",
+        });
+
+        const view = new MapView({
+          container: "viewDiv",
+          map: map,
+          center: [30, 30],
+          zoom: 7,
+        });
+        const labelClass = {
+          symbol: {
+            type: "text",
+            color: "black",
+            font: {
+              family: "Playfair Display",
+              size: 12,
+              weight: "bold",
+            },
+          },
+          labelPlacement: "above-center",
+          minScale: 2500000,
+          maxScale: 0,
+          labelExpressionInfo: {
+            expression: "$feature.Name",
+          },
+          where: "evalu > 4.5",
+        };
+        const featureLayer = new FeatureLayer({
+          url: "https://services3.arcgis.com/eXlDwQdvlRDgGF9b/arcgis/rest/services/site/FeatureServer/7",
+          labelingInfo: [labelClass],
+          renderer: {
+            type: "simple",
+            label: "المعالم السياحية",
+            symbol: {
+              type: "picture-marker",
+              url: "https://i.postimg.cc/GtLk5BDP/camera-2.png",
+              width: "18px",
+              height: "18px",
+            },
+          },
+        });
+        map.add(featureLayer);
+        const popup = {
+          title: "{Name}",
+          content: [
+            {
+              type: "fields",
+              fieldInfos: [
+                {
+                  fieldName: "Name",
+                  label: "الاسم",
+                },
+                {
+                  fieldName: "ُEname",
+                  label: "Name",
+                },
+                {
+                  fieldName: "sumb",
+                  label: "التصنيف",
+                },
+                {
+                  fieldName: "evalu",
+                  label: "التقييم",
+                },
+              ],
+            },
+          ],
+        };
+
+        featureLayer.popupTemplate = popup;
+
+        let legend = new Legend({
+          view: view,
+        });
+        view.ui.add(legend, "bottom-right");
+
+        const basemapGallery = new BasemapGallery({
+          view: view,
+        });
+        const expand = new Expand({
+          view: view,
+          content: basemapGallery,
+          expandIconClass: "esri-icon-basemap",
+        });
+        view.ui.add(expand, "top-left");
+
+        const searchWidget = new Search({
+          view: view,
+        });
+        view.ui.add(searchWidget, {
+          position: "top-right",
+          index: 2,
+        });
+
+        let scaleBar = new ScaleBar({
+          view: view,
+        });
+        view.ui.add(scaleBar, {
+          position: "bottom-left",
+        });
+
+        let locateWidget = new Locate({
+          view: view,
+        });
+        view.ui.add(locateWidget, "top-left");
+
+        var table = new FeatureTable({
+          view: view,
+          layer: featureLayer,
+          container: "tableDiv",
+        });
+
+        const showTable = document.getElementById("showTable");
+        view.ui.add(showTable, "top-left");
+
+        showTable.addEventListener("click", function () {
+          let tableDiv = document.getElementById("tableDiv");
+          if (tableDiv.style.display === "flex") {
+            tableDiv.style.display = "none";
+          } else {
+            tableDiv.style.display = "flex";
+          }
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+    <div id="tableDiv"></div>
+    <dib
+      id="showTable"
+      class="esri-widget esri-widget--button esri-interactive esri-icon-table"
+    ></dib>
+  </body>
+</html>

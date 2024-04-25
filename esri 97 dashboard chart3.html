@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1,maximum-scale=1,user-scalable=no"
+    />
+    <title>
+      Intro to FeatureLayer | Sample | ArcGIS Maps SDK for JavaScript 4.29
+    </title>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.29/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.29/"></script>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+      html,
+      body {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 50%;
+        width: 100%;
+      }
+      #chart{
+        display: flex;
+        height: 400px;
+      }
+      #myChart ,
+      #myChart2{
+        
+        height: 100%;
+        width: 50%;
+      }
+      #featureCount {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+        background-color: white;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+      #featureCountContainer {
+        position: absolute;
+        top: 50px;
+        right: 10px;
+        z-index: 1000;
+        background-color: white;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+    </style>
+
+    <script>
+      require([
+        "esri/Map",
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/rest/support/Query",
+      ], (Map, MapView, FeatureLayer, Query) => {
+        const map = new Map({
+          basemap: "hybrid",
+        });
+
+        const view = new MapView({
+          container: "viewDiv",
+          map: map,
+          center: [30, 30],
+          zoom: 7,
+        });
+
+        const featureLayer = new FeatureLayer({
+          url: "https://services3.arcgis.com/eXlDwQdvlRDgGF9b/arcgis/rest/services/site/FeatureServer/7",
+        });
+
+        map.add(featureLayer);
+
+        let featureCount = document.getElementById("featureCount");
+        let fCC = document.getElementById("featureCountContainer");
+
+        let currentExtent;
+
+        view.whenLayerView(featureLayer).then((layerView) => {
+          updateFeatureCount(layerView);
+          view.watch("extent", () => updateFeatureCount(layerView));
+        });
+
+        function updateFeatureCount(layerView) {
+          layerView.queryFeatureCount().then((count) => {
+            featureCount.textContent = "عدد المعالم: " + count;
+          });
+        }
+
+        view.whenLayerView(featureLayer).then((layerView) => {
+          updateFCC(layerView);
+          view.watch("extent", () => {
+            const newExtent = view.extent;
+            if (!currentExtent || !currentExtent.equals(newExtent)) {
+              currentExtent = newExtent;
+              updateFCC(layerView);
+              drawChart();
+            }
+          });
+        });
+
+        function updateFCC(layerView) {
+          if (currentExtent) {
+            const query = {
+              geometry: currentExtent,
+              spatialRelationship: "intersects",
+            };
+
+            layerView.queryFeatureCount(query).then((count) => {
+              fCC.textContent = "عدد المعالم في العرض: " + count;
+            });
+          }
+        }
+        google.charts.load("current", { packages: ["corechart"] });
+google.charts.setOnLoadCallback(() => {
+  drawChart();
+});
+        function drawChart() {
+          const query = new Query();
+          query.geometry = currentExtent;
+          query.returnGeometry = false;
+          query.outFields = ["sumb"];
+          query.groupByFieldsForStatistics = ["sumb"];
+          query.outStatistics = [
+            {
+              onStatisticField: "1",
+              outStatisticFieldName: "count",
+              statisticType: "count",
+            },
+          ];
+
+          featureLayer.queryFeatures(query).then((result) => {
+            const data = [["المعالم", "العدد"]];
+            result.features.forEach((feature) => {
+              const type = feature.attributes["sumb"];
+              const count = feature.attributes["count"];
+              data.push([type, count]); // إضافة القيمة وعدد المعالم إلى قائمة البيانات
+            });
+
+            // تعبئة جدول البيانات للرسم البياني
+            const chartData = google.visualization.arrayToDataTable(data);
+
+            // رسم الرسم البياني
+            const chart = new google.visualization.PieChart(
+              document.getElementById("myChart")
+            );
+            chart.draw(chartData, {
+              title: "عدد المعالم السياحية",
+            });   
+             const chart2 = new google.visualization.ColumnChart(
+              document.getElementById("myChart2")
+            );
+            chart2.draw(chartData, {
+              title: "عدد المعالم السياحية",
+            });
+          });
+        }
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+    <div id="featureCount"></div>
+    <div id="featureCountContainer"></div>
+    <div id="chart">
+      <div id="myChart" ></div>
+      <div id="myChart2" ></div>
+    </div>
+  </body>
+</html>

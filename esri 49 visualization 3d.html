@@ -1,0 +1,110 @@
+<html>
+<head>
+  <meta name="description" content="ArcGIS JavaScript Tutorials: Filter a feature layer">
+  <meta charset="utf-8">
+  <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+  <title>esri 40 visualization 3d</title>
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+  </style>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css">
+  <script src="https://js.arcgis.com/4.28/"></script>
+
+  <script>
+    require([
+      "esri/config",
+      "esri/Map",
+      "esri/views/SceneView",
+      "esri/layers/FeatureLayer",
+      "esri/widgets/Legend",
+    ], function (
+      esriConfig,
+      Map,
+      SceneView,
+      FeatureLayer,
+      Legend,
+    ) {
+
+      esriConfig.apiKey = "AAPK38fe331b8ad54d5c8f1a61caeed4a0aeFK58soA0O_QvcrYBWgfso98-TXqwkOmn-uCswi0uDJlw10hcggtS9abCINLTk4Y0";
+
+      const map = new Map({
+        basemap: "arcgis/topographic" 
+      });
+
+      const view = new SceneView({
+        container: "viewDiv",
+        map: map,
+        camera: {
+          position: {
+            latitude: 13.24237,
+            longitude: 31.72943,
+            z: 1560560
+          },
+          tilt: 45,
+        }
+      });
+      const Layer = new FeatureLayer({
+        //  محافظات مصر   
+        url: "https://services3.arcgis.com/t6lYS2Pmd8iVx1fy/arcgis/rest/services/egy_bnd_admin1_govcapmas_2017/FeatureServer/0",
+        renderer: {
+          type: "simple",
+          symbol: {
+            type: "polygon-3d",
+            symbolLayers: [{ type: "extrude" }]
+          },
+          label: "% population in poverty by county",
+          visualVariables: [
+            {
+              type: "size",
+              field: "Population_2017",
+              stops: [
+                {
+                  value: 102018,
+                  size: 1600
+                },
+                {
+                  value: 9539673,
+                  size: 50000
+                }
+              ]
+            },
+            {
+              type: "color",
+              field: "Population_2017",
+              stops: [
+                {
+                  value: 102018,
+                  color: "#FFFCD4"
+                },
+                {
+                  value: 9539673,
+                  color: [153, 83, 41]
+                }
+              ]
+            }
+          ]
+        }
+
+      });
+      map.add(Layer);
+      const legend = new Legend({
+        view: view
+      });
+      view.ui.add(legend, "bottom-right");
+
+    });
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+</body>
+
+</html>

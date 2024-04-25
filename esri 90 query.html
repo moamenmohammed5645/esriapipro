@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intro to FeatureLayer | Sample | ArcGIS Maps SDK for JavaScript 4.29</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css">
+    <script src="https://js.arcgis.com/4.29/"></script>
+    <style>
+        html, body, #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        #featureList {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+            overflow-y: auto;
+            max-height: 700px; 
+            width: 200px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 5px;
+        }
+
+        .featureItem {
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        .featureItem:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+    <script>
+        require(["esri/Map", "esri/views/MapView", "esri/layers/FeatureLayer"], (
+            Map,
+            MapView,
+            FeatureLayer
+        ) => {
+            const map = new Map({
+                basemap: "hybrid",
+            });
+
+            const view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [30, 30],
+                zoom: 7,
+            });
+
+            const featureLayer = new FeatureLayer({
+                url: "https://services3.arcgis.com/eXlDwQdvlRDgGF9b/arcgis/rest/services/site/FeatureServer/7",
+                outFields: ["*"],
+                popupTemplate: {
+                    title: "{Name}",
+                 
+                }
+            });
+
+            map.add(featureLayer);
+
+            const featureListDiv = document.createElement("div"); 
+            featureListDiv.id = "featureList";
+
+            featureLayer.queryFeatures().then((result) => {
+                result.features.forEach((feature) => {
+                    const featureItem = document.createElement("div");
+                    featureItem.classList.add("featureItem");
+                    featureItem.textContent = feature.attributes.Name;
+                    featureItem.addEventListener("click", () => {
+                        view.popup.open({
+                            title: feature.attributes.Name,
+                            location: feature.geometry
+                        });
+                        view.goTo({
+                            target: feature.geometry,
+                            zoom: 18,
+                        });
+                    });
+                    featureListDiv.appendChild(featureItem);
+                });
+            });
+
+            document.body.appendChild(featureListDiv);
+        });
+    </script>
+</head>
+<body>
+<div id="viewDiv"></div>
+</body>
+</html>
