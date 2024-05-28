@@ -38,6 +38,7 @@
 
     <script>
       require([
+      "esri/config",
         "esri/Map",
         "esri/views/MapView",
         "esri/layers/FeatureLayer",
@@ -49,6 +50,7 @@
         "esri/widgets/Locate",
         "esri/widgets/FeatureTable",
       ], (
+      esriConfig,
         Map,
         MapView,
         FeatureLayer,
@@ -60,6 +62,9 @@
         Locate,
         FeatureTable
       ) => {
+        
+      esriConfig.apiKey = "AAPK38fe331b8ad54d5c8f1a61caeed4a0aeFK58soA0O_QvcrYBWgfso98-TXqwkOmn-uCswi0uDJlw10hcggtS9abCINLTk4Y0";
+        
         const map = new Map({
           basemap: "satellite",
         });
