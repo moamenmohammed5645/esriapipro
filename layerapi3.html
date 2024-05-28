@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>تبديل العرض من ثنائي الأبعاد إلى ثلاثي الأبعاد </title>
+  <style>
+    html,
+    body,
+    #viewDiv {
+      padding: 0;
+      margin: 0;
+      height: 100%;
+      width: 100%;
+    }
+
+    #infoDiv {
+      position: absolute;
+      top: 15px;
+      left: 60px;
+    }
+
+    #infoDiv input {
+      border: none;
+      box-shadow: rgba(0, 0, 0, 0.3) 0px 1px 2px;
+    }
+  </style>
+  <link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css" />
+  <script src="https://js.arcgis.com/4.28/"></script>
+  <script>
+    require([
+      "esri/config","esri/views/MapView", "esri/views/SceneView", "esri/WebMap", "esri/WebScene"], (
+      esriConfig,
+      MapView,
+      SceneView,
+      WebMap,
+      WebScene
+    ) => {
+      
+      esriConfig.apiKey = "AAPK38fe331b8ad54d5c8f1a61caeed4a0aeFK58soA0O_QvcrYBWgfso98-TXqwkOmn-uCswi0uDJlw10hcggtS9abCINLTk4Y0";
+      
+      const webmap = new WebMap({
+        portalItem: {
+          id: "7ee3c8a93f254753a83ac0195757f137"
+        }
+      });
+
+      const scene = new WebScene({
+        portalItem: {
+          id: "c8cf26d7acab4e45afcd5e20080983c1"
+        }
+      });
+
+      let is3D = false;
+
+      let view = new MapView({
+        container: "viewDiv",
+        map: webmap,
+        center: [-122.4194, 37.7749],
+        zoom: 11
+      });
+
+      const switchButton = document.getElementById("switch-btn");
+      switchButton.addEventListener("click", () => {
+        if (is3D) {
+          view = new MapView({
+            container: "viewDiv",
+            map: webmap,
+            center: [174.062376, -39.355675],
+            zoom: 11
+          });
+          switchButton.value = "3D";
+          is3D = false;
+        } else {
+          view = new SceneView({
+            container: "viewDiv",
+            map: scene
+          });
+          switchButton.value = "2D";
+          is3D = true;
+        }
+      });
+    });
+  </script>
+</head>
+
+<body>
+  <div id="viewDiv"></div>
+  <div id="infoDiv">
+    <input
+      class="esri-component esri-widget--button esri-widget esri-interactive"
+      type="button"
+      id="switch-btn"
+      value="3D"
+    />
+  </div>
+</body>
+</html>
